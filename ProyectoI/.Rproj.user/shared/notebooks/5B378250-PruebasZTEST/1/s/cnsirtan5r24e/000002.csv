@@ -1,0 +1,6 @@
+"0","#Aquí se obtiene la cantidad de las personas que se inclinan por cada partido y que ganan más de 400 000 colones."
+"0","#Cantidad de personas que se inclinan por cada partido y que ganan más de 400000"
+"0",""
+"0","CantidadPLN <- length(SalarioPLN)"
+"0","CantidadPAC <- length(SalarioPAC)"
+"0",""

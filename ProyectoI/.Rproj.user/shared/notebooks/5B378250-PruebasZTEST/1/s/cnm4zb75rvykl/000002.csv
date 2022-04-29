@@ -1,0 +1,2 @@
+"0","#Se carga la base de datos. Se almacena la variable Elecciones para ser manipulada."
+"0","Elecciones <- read_excel(""Datos/Elecciones.xlsx"")"
