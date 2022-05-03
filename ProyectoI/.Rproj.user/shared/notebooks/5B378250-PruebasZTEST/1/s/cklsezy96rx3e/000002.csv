@@ -1,3 +1,0 @@
-"0","set.seed(1000)"
-"0","HombresEdad.elegidos<- sample(1:length(HombresEdad),30,replace = TRUE)"
-"0",""

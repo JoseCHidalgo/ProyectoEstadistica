@@ -1,2 +1,0 @@
-"0","PLN  <- Elecciones[Elecciones$partidoPolítico == ""PLN"" ,]$interesPolítica"
-"0","PLN <-as.numeric(PLN)"
