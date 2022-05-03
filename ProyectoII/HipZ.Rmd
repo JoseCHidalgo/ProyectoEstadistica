@@ -1,0 +1,130 @@
+---
+title: "Hipótesis Z"
+author: "David González"
+date: "3/5/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r include=FALSE}
+library(readxl) #Paquete para leer archivo de excel xlsx
+library(epitools)
+library(EnvStats)
+library(PASWR2) #Paquete que contiene la función z.test para IC Dist Z
+library(BSDA) #Paquete#2 que contiene la función z.test para IC Dist Z
+library(stests) #Paquete#3 que contiene función z.test para IC Dist Z
+library(DataExplorer) #Utilizamos función plot_missing para ver valores nulos
+library(ggplot2) 
+```
+
+
+
+```{r include=FALSE}
+#Se carga la base de datos. Se almacena la variable Elecciones para ser manipulada.
+Elecciones <- read_excel("Datos/Elecciones.xlsx")
+```
+
+***
+
+# Pruebas de hipótesis 
+
+## Promedio con Distribución Z para 1 población.
+
+
+Regresando al mismo problema tomado para un Intervalo de Confianza de un promedio para 1 población tenemos:
+
+
+**Se quiere analizar el saladio de las personas entre 18 años y 60 años.
+Una persona afirma que el salario promedio de este grupo es mayor a los 800000 colones.**
+
+
+
+Del enunciado tenemos:
+
+  $H_0:  \mu = 800000 colones$
+  
+  $H_1:  \mu > 800000 colones$
+
+Basándonos en $H_1$ sabemos que el tipo de prueba es de *Cola Derecha* utilizando la distribución $Z$.
+
+
+Para automatizar el proceso se utilizará del paquete stest la función z.test que contiene:
+
+
+              stests::z.test(x, sigma2, mu, alternative, conf.level)
+
+
+en donde:
+
+
+
+| Argumentos        | Descripción 
+|-------------------|-------------------------------------------------------------------------|
+| **x:**            | vector de valores numéricos                                             |
+| **sigma2:**       | varianza poblacional conocida                                           |
+| **mu:**           | media de la hipótesis nula                                              |
+| **alternative:**  | es el tipo de prueba, se puede escoger entre two.sided para casos de dos colas, greater para caso de cola derecha y less para el caso de cola izquierda.               |
+| **conf.level:**   | nivel de confianza dle intervalo, por defecto viene en 0.95             |
+
+A continuación se mostrará las variables que se requieren para realizar la prueba de hipótesis de una media:
+
+
+| Variables         | Tipo                 | Descripción 
+|-------------------|----------------------|--------------------------------------------------|
+| **salario:**      | numérica             | salario de personas entre los 18 años y 60 años  |
+| **salarioVar:**   | numérica             | varianza muestral de la población                | 
+
+
+
+
+La implementación en R para las variables es la siguiente:
+
+
+```{r echo=TRUE}
+# Tomamos los salarios de personas entre los 18 años y 60 años de edad
+salario <- Elecciones[Elecciones$edad > 17 & Elecciones$edad < 61,]$salarioMes
+```
+
+
+```{r echo=TRUE}
+#La variable salario la convertimos a tipo numeric.
+salario <- as.numeric(salario)
+```
+
+
+```{r include=FALSE}
+
+#Solo tomamos los salarios > 100 colones.
+salario <- salario[ salario > 100]
+```
+
+Obtenemos la varianza:
+```{r echo=TRUE}
+#Salario varianza
+salarioVar = var(salario)
+```
+
+
+
+
+A continuación la implementación de la prueba de hipótesis:
+```{r}
+stests::z.test(x = salario, sigma2 = salarioVar, mu = 800000, alternative = "greater", conf.level = 0.95)
+```
+
+De lo obtenido podemos observar que la Región de Aceptación *(RA)* y la Región de Rechazo *(RR)* quedaron de la siguiente manera:
+
+
+
+$RA: ] 657029.2, +  \infty[$
+
+$RR: ] - \infty, 657029.2[$
+
+Notamos que para este caso no se encontró evidencia suficiente en contra de $H_0$ por lo que no se rechaza, pues:
+
+$800000 \in RA$
+
+Llegando a concluir que el salario promedio a lo sumo ronda los 800000 colones.
+
+***
