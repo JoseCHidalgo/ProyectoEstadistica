@@ -144,8 +144,6 @@ Desviación Estandar: $S_1 = 15.14$
 
 Tamaño de muestra: $n_1 = 30$
 
-Grados de libertad: 29
-
 Nivel de confianza: 95%
 
 
@@ -159,10 +157,12 @@ Desviación Estandar: $S_2 = 12.78$
 
 Tamaño de muestra: $n_2 = 30$
 
-Grados de libertad: 29
+
 
 Nivel de confianza: 95%
 
+
+Grados de libertad para la distribución T: $gl = 59$
 
 
 Para calcular el intervalo de confianza  de la distribución T, se utiliza la siguiente funcion de R.
