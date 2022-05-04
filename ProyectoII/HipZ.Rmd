@@ -40,7 +40,7 @@ Una persona afirma que el salario promedio de este grupo es mayor a los 800000 c
 
 
 
-Del enunciado tenemos:
+Del enunciado tenemos las siguientes hipótesis:
 
   $H_0:  \mu = 800000 colones$
   
@@ -126,5 +126,131 @@ Notamos que para este caso no se encontró evidencia suficiente en contra de $H_
 $800000 \in RA$
 
 Llegando a concluir que el salario promedio a lo sumo ronda los 800000 colones.
+
+***
+
+
+
+
+## Diferencia de promedios con Distribución Z (2 poblaciones).
+
+Tomando como base las poblaciones utilizadas para un Intervalo de Confianza de una diferencia de promedios usando distribución Z, tenemos lo siguiente:
+
+
+
+Sean X e Y variables aleatorias, donde:
+
+**X:** Población de personas menores a 40 años.
+
+**Y:** Población de personas mayores a 39 años.
+
+
+**Nos planteamos si la media del interés en la política es la misma para el grupo de personas menores a 40 años y el grupo de personas mayores a 39 años.**
+
+Del enunciado tenemos las siguientes hipótesis:
+
+  $H_0:  \mu_1 = \mu_2  \approx \mu_1 - \mu_2 = 0$
+  
+  $H_1:  \mu_1 \neq \mu_2$
+
+
+El tipo de prueba es de *Dos Colas* por lo que $H_1$ nos presenta. También se utilizará la distribución $Z$
+
+Para la implementación se utilizará la función z.test del paquete BSDA:
+
+
+        BSDA::z.test(x, y, sigma.x, sigma.y, mu, alternative, conf.level)
+
+en donde:
+
+| Argumentos        | Descripción 
+|-------------------|-------------------------------------------------------------------------|
+| **x:**             | vector de valores numéricos correspondiente a la población 1            |
+| **y:**             | vector de valores numéricos correspondiente a la población 2            |
+| **sigma.x:**       | desviación estándar de la población 1                                   |
+| **sigma.y:**       | desviación estándar de la población 2                                   |
+| **mu:**           | diferencia de medias especificada en la hipótesis nula                  |
+| **alternative:**  | tipo de prueba, se puede escoger entre "two.sided" para casos de dos colas, "greater" para caso de cola derecha y "less" para el caso de cola izquierda.           |
+| **conf.level:**   | nivel de confianza dle intervalo. Tiene que ser un valor entre 0 y 1    |
+
+
+Variables requeridas para realizar la prueba:
+
+| Variables         | Tipo                 | Descripción 
+|-------------------|----------------------|--------------------------------------------------|
+| **interesPol1:**  | numérica             | Valor entre 0 y 10 que se refiere al interés en la política de personas menores a 40 años.                                                       |
+| **interesPol2:**  | numérica             | Valor entre 0 y 10 que se refiere al interés en la política de personas mayores a 39 años.                                                       |
+| **intPolDE1:**    | numérica             | desviación estándar del grupo1                   |
+| **intPolDE2:**    | numérica             | desviación estándar del grupo2                   |
+
+A continuación se muestra la implementación:
+
+
+```{r echo=TRUE}
+#Seleccionamos a las personas menor de 40 años junto con el interés hacia la política que tienen
+interesPol1 <- Elecciones[Elecciones$edad < 40 ,]$interesPolítica
+```
+
+
+
+```{r echo=TRUE}
+#Seleccionamos a las personas de 40 años o más, junto con el interés hacia la política que tienen
+interesPol2 <- Elecciones[Elecciones$edad >= 40 ,]$interesPolítica
+```
+
+```{r include=FALSE}
+
+#convertimos a numeric
+
+interesPol1 <- as.numeric(interesPol1)
+interesPol1
+```
+
+```{r include=FALSE}
+interesPol2 <- as.numeric(interesPol2)
+interesPol2
+```
+
+```{r echo=TRUE}
+# Sacamos la desviacion estándar del primer grupo
+intPolDE1 <- sd(interesPol1)
+intPolDE1
+```
+
+
+```{r include=FALSE}
+#omitimos nulos de la población 2 ya que contiene nulos.
+intPolDE2 <- na.omit(interesPol2)
+intPolDE2
+```
+
+
+```{r echo=TRUE}
+#Desviacion estándar del segundo grupo.
+intPolDE2 <- sd(intPolDE2)
+intPolDE2
+```
+
+
+A continuación la implementación de la prueba de hipótesis
+```{r}
+BSDA::z.test(x = interesPol1, y = interesPol2, alternative = "two.sided" , mu = 0, sigma.x = intPolDE1, sigma.y = intPolDE2 ,conf.level = 0.90)
+```
+
+De lo obtenido podemos observar lo siguiente:
+
+$RA: ] -0.6320728, 0.4230857[$
+
+$RR: ] - \infty, -0.6320728[ \cup ]0.4230857, + \infty[$
+
+$Z_{obs} = -0.32578$
+
+$P = 0.7446$
+
+$\mu_1 = 5.237200$
+
+$\mu_2 = 5.341694$
+
+Analizando los resultados, se concluye que no hay suficiente evidencia para rechazar $H_0$ ya que el valor $0 \in RA$ Por lo tanto lo planteado en el problema se concluye que es altamente probable que las medias de ambas poblaciones sean iguales. 
 
 ***
