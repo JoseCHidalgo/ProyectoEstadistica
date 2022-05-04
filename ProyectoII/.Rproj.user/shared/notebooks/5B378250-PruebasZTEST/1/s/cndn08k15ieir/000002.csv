@@ -1,0 +1,1 @@
+"0","interesPol1 <- Elecciones[Elecciones$edad < 40 ,]$interesPolítica"

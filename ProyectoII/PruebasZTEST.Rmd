@@ -1,0 +1,1066 @@
+---
+title: "Intervalos de Confianza"
+authors: "David González Agüero, José Luis Ramírez Hernández, José Pablo Espinoza López, José Carlo Hidalgo Chacón."
+date: "30/3/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r include=FALSE}
+library(readxl) #Paquete para leer archivo de excel xlsx
+library(epitools)
+library(EnvStats)
+library(PASWR2) #Paquete que contiene la función z.test para IC Dist Z
+library(BSDA) #Paquete#2 que contiene la función z.test para IC Dist Z
+library(stests) #Paquete#3 que contiene función z.test para IC Dist Z
+library(DataExplorer) #Utilizamos función plot_missing para ver valores nulos
+library(ggplot2) 
+```
+
+```{r include=FALSE}
+#Se carga la base de datos. Se almacena la variable Elecciones para ser manipulada.
+Elecciones <- read_excel("Datos/Elecciones.xlsx")
+```
+
+
+# Análisis Inferencial
+
+
+
+## IC Distribución T para una Población  {#anchor} 
+
+
+Se asume que las personas entre adulta y adultas mayores son las que suelen apoyar los partidos políticos tradicionales. Las personas jóvenes suelen apoyar a partidos nuevos, por lo que se analizara la edad de todas las personas quienes tiene preferencia hacia los partidos políticos tradicionalistas (PLN, PUSC).    
+
+**Población:**
+
+```{r echo=FALSE}
+Votantes.tradicionales <- Elecciones[Elecciones$partidoPolítico == "PLN" | Elecciones$partidoPolítico == "PUSC",]$edad
+
+Votantes.tradicionales
+```
+Para analizar la hipótesis se tomará un grupo de 30 personas quienes apoyan al Partido Liberación Nacional o al Partido Unidad Social Cristiana. Este muestreo se realiza de forma aleatoria.  
+
+```{r echo=TRUE}
+set.seed(1000)
+Votantes.tradicionales.elegidos <- sample(1:length(Votantes.tradicionales),30,replace = TRUE)
+```
+
+
+
+```{r echo=TRUE}
+muestra.Votantes.tradicionales <- Votantes.tradicionales[Votantes.tradicionales.elegidos]
+muestra.Votantes.tradicionales
+```
+Suponiendo que la muestra poblacional $X$ sigue una distribución normal se requiere un intervalo de confianza del 95%.
+
+**Datos de la poblacion:**
+
+Variable aleatoria: Normal
+
+Media: $\overline{X} = 43.1$
+
+Desviación Estandar: $S = 17.82163$
+
+Tamaño de muestra: $n = 30$
+
+Grados de libertad: $gl = 29$
+
+Nivel de confianza: 95%
+
+Para calcular el intervalo de confianza  de la distribución T, se utiliza la siguiente funcion de R.
+
+*t.test(Datos de la muestra ($X$), Nivel de confianza)$conf.int*
+
+
+El cálculo del intervalo de confianza de 95% en una distribución t es:
+
+
+```{r}
+t.test(muestra.Votantes.tradicionales,conf.level = 0.95)$conf.int
+```
+Se estima con un 95% de confianza que el IC encontrado contenga al promedio de las personas que apoyan al PLN y PUSC.
+```{r include=FALSE}
+me.muestra.Votantes.tradicionales <- mean(muestra.Votantes.tradicionales)
+de.muestra.Votantes.tradicionales <- sd(muestra.Votantes.tradicionales)
+
+```
+
+```{r include=FALSE}
+cisim(samples = 100, n = 30, parameter = me.muestra.Votantes.tradicionales, sigma = de.muestra.Votantes.tradicionales, conf.level = 0.95)
+```
+## IC Distribución T para dos Población  {#anchor} 
+
+Se tiene dos poblaciones en la cual se busca analizar la edad de las mujeres y hombres con estudios universitarios que participan en la política para ver cuál de ambas tiene la mayor población joven que participa actualmente en la política del país. 
+
+Se asume que los hombres con universidad completa que participan en la política son de mayor edad que las mujeres con universidad completa. 
+
+**Población de la edad de todas las mujeres:**
+
+```{r echo=FALSE}
+MujeresEdad <- Elecciones[Elecciones$sexo == "Mujer" & Elecciones$estudios == "Universidad completa" ,]$edad
+MujeresEdad
+```
+
+**Población de la edad de todos los hombres:**
+```{r echo=FALSE}
+HombresEdad <- Elecciones[Elecciones$sexo == "Hombre" & Elecciones$estudios == "Universidad completa" ,]$edad
+HombresEdad
+```
+Debido a que las poblaciones son mayores a 30 datos, se requiere hacer un muestreo de ambas poblaciones. Dicho muestreo se realiza de forma aleatoria.  
+
+```{r include=FALSE}
+set.seed(1000)
+MujeresEdad.elegidas <- sample(1:length(MujeresEdad),30,replace = TRUE)
+
+```
+**Muestra de la edad de las mujeres:**
+```{r echo=TRUE}
+muestra.MujeresEdad <- MujeresEdad[MujeresEdad.elegidas]
+muestra.MujeresEdad
+```
+
+```{r include=FALSE}
+set.seed(1000)
+HombresEdad.elegidos<- sample(1:length(HombresEdad),30,replace = TRUE)
+
+```
+**Muestra de la edad de los hombres:**
+```{r echo=TRUE}
+muestra.HombresEdad <- HombresEdad[HombresEdad.elegidos]
+muestra.HombresEdad
+```
+Suponiendo que ambas poblaciones sigue una distribución normal se requiere un intervalo de confianza del 95% 
+
+
+**Datos de la poblacion de edad de las mujeres:**
+
+Variable aleatoria: Normal
+
+Media: $\overline{X}_1 = 40.3$
+
+Desviación Estandar: $S_1 = 15.14$
+
+Tamaño de muestra: $n_1 = 30$
+
+Grados de libertad: 29
+
+Nivel de confianza: 95%
+
+
+**Datos de la poblacion de edad de los hombres:**
+
+Variable aleatoria: Normal
+
+Media: $\overline{X}_2 = 38.23$
+
+Desviación Estandar: $S_2 = 12.78$
+
+Tamaño de muestra: $n_2 = 30$
+
+Grados de libertad: 29
+
+Nivel de confianza: 95%
+
+
+
+Para calcular el intervalo de confianza  de la distribución T, se utiliza la siguiente funcion de R.
+
+*t.test(Datos de la muestra uno ($\overline{X} 1$),Datos de la muestra dos ($\overline{X} 2$), Nivel de confianza)$conf.int*
+
+```{r}
+t.test(muestra.HombresEdad ,muestra.MujeresEdad ,conf.level = 0.95)$conf.int
+```
+```{r}
+t.test(muestra.MujeresEdad,muestra.HombresEdad ,conf.level = 0.95)$conf.int
+```
+Por medio del intervalo de confianza se ha demostrado que no hay diferencias significativas de edades entre las 2 poblaciones debido a que el 0 se encuentra incluido dentro del intervalo, por lo que podemos asegurar que ambas poblaciones son iguales.
+
+
+
+ 
+## Intervalos de Confianza para una proporción 
+
+```{r include=FALSE}
+PLN  <- Elecciones[Elecciones$partidoPolítico == "PLN" ,]$interesPolítica
+PLN <-as.numeric(PLN)
+```
+
+Para el intervalo de confianza de un promedio, se analizan los datos recolectados, específicamente la población que prefiere al partido político PLN y se estudia la proporción de las personas que tienen un grado académico de universidad completa.
+
+Se espera que el grado académico las personas que se inclinan por este partido tienen 
+preferencia por el PLN es alto.
+
+Para realizar este análisis se usa la siguiente fórmula:
+
+*prop.test(x, n, conf.level)$conf.int *
+
+Donde: 
+
+**x: ** es el número de casos exitosos o los que se quieren estudiar.
+
+**n: ** el número total de casos.
+
+**Conf.level:** es el nivel de confiabilidad.
+
+
+Ahora, se procede a obtener la cantidad de personas que se inclinan por el PLN
+```{r echo=TRUE}
+#Cantidad de personas que se inclinan por el PLN
+
+TotalPLN  <- Elecciones[Elecciones$partidoPolítico == "PLN",]$salarioMes
+
+CantidadTotalPLN  <- length(TotalPLN) 
+CantidadTotalPLN
+
+```
+
+Después se obtiene el total de personas se inclinan por el PLN y a la vez, tienen un estudio universitario completo. 
+
+```{r echo=TRUE}
+# Personas del PLN con un posgrado
+
+UniversidadPLN  <- Elecciones[Elecciones$estudios == "Universidad completa" &                Elecciones$partidoPolítico == "PLN",]$estudios
+CantidadUniversidadPLN  <- length(UniversidadPLN) 
+CantidadUniversidadPLN
+
+```
+Con los datos obtenidos se realiza el intervalo de la siguiente manera:
+
+**x:** 24
+
+**n:** 86
+
+**conf.level:** 0.95
+
+```{r}
+#Calculando el intervalo
+
+prop.test(x=CantidadUniversidadPLN, n=CantidadTotalPLN, conf.level=0.95)$conf.int
+
+
+```
+
+A partir del intervalo obtenido se puede concluir que con un nivel de confianza del 95% se espera que el IC contenga a la proporción de personas con grado académico universitario que apoya al PLN.
+
+```{r include=FALSE}
+# Realizando el gráfico
+
+cisim(CantidadTotalPLN, CantidadUniversidadPLN, 0.05, type = "Pi", conf.level = 0.95)
+
+
+```
+
+
+
+
+## Intervalos de Confianza para diferencia de dos proporciones
+
+Al estudiar la información obtenida en la base de datos, se sabe que del total de 300 votantes, 50 se inclinan por el PAC y 86 por el PLN, se infiere que no hay mucha diferencia entre el salario de las dos poblaciones por lo que se procede a analizar cuantas personas ganan más de 400 000 colones al mes y con esta información se realiza el intervalo de confianza de una diferencia de poblaciones.
+
+Para realizar este cálculo se usa la siguiente fórmula:
+
+*prop.test(x = c(x1, x2), n = c(y1), y2), conf.level)$conf.int*
+
+Donde:
+
+**x:** vector con el conteo de éxitos de las dos muestras
+
+**x1:** datos de la población 1 (de éxitos)
+
+**x2:** datos de la población 2 (de éxitos)
+
+**n:** vector con el número de ensayos de ambas muestras
+
+**y1:** datos de la población 1 (de la muestra)
+
+**y2:** datos de la población 2 (de la muestra)
+
+**conf.level:** nivel de confianza.
+
+
+Primero se obtienen los datos de los votantes del PLN y del PAC que ganan más de 400 000 colones al mes.
+
+```{r echo=TRUE}
+#Salario de los votantes del PLN y del PAC que ganan más de 400,000 
+
+SalarioPLN  <- Elecciones[Elecciones$partidoPolítico == "PLN" & Elecciones$salarioMes >= 400000,]$salarioMes 
+SalarioPAC  <- Elecciones[Elecciones$partidoPolítico == "PAC" & Elecciones$salarioMes >= 400000 ,]$salarioMes
+
+
+SalarioPLN <-as.numeric(SalarioPLN) 
+SalarioPAC <-as.numeric(SalarioPAC)
+
+SalarioPAC
+SalarioPLN
+
+```
+
+Seguidamente se obtiene la cantidad de las personas que se inclinan por cada partido y que ganan más de 400 000 colones.
+
+```{r echo=TRUE}
+#Aquí se obtiene la cantidad de las personas que se inclinan por cada partido y que ganan más de 400 000 colones.
+#Cantidad de personas que se inclinan por cada partido y que ganan más de 400000
+
+CantidadPLN <- length(SalarioPLN)
+CantidadPAC <- length(SalarioPAC)
+
+```
+
+
+
+Luego, obtiene la cantidad total de votantes en cada partido.
+
+```{r echo=TRUE}
+#Se obtiene la cantidad total de  votantes del PLN y del PAC
+
+TotalPLN  <- Elecciones[Elecciones$partidoPolítico == "PLN",]$salarioMes
+CantidadTotalPLN  <- length(TotalPLN) 
+
+TotalPAC  <- Elecciones[Elecciones$partidoPolítico == "PAC",]$salarioMes
+CantidadTotalPAC  <- length(TotalPAC) 
+
+CantidadTotalPLN
+CantidadTotalPAC
+```
+Ahora se procede a calcular el intervalo.
+
+```{r}
+
+#Calculando el intervalo
+
+prop.test(x = c(CantidadPLN, CantidadPAC), n = c((CantidadTotalPLN), (CantidadTotalPAC)), conf.level = 0.95)$conf.int
+
+
+
+```
+
+Con una confianza del 95% se espera que el IC encontrado contenga a la diferencia de proporciones entre los grupos de personas que ganan más de 400000 colones y que apoyan al PAC o al PLN, a su vez las proporciones de personas con salario superior a 400mil colones que apoyan al PAC o al PLN son iguales. 
+
+
+
+
+###IC de una varianza utlizando una población
+
+
+####Se quiere analizar el salario a las mujeres con salario mayor o igual a 200000 en el período que la encuenta fué realizada 2021.
+
+Población: Mujeres que tengan un salario mensual mayor o igual a 200000.
+Variable cuantitativa: salarioMujer.
+
+Se asume que las mujeres que tengan un salario mensual mayor o igual a 200000 es normal.
+
+
+####Mujeres que tengan un salario mensual mayor a 200000.
+```{r}
+salarioMujer <- Elecciones[Elecciones$sexo=="Mujer" & Elecciones$salarioMes >= 200000,]$salarioMes
+salarioMujer <- as.numeric(salarioMujer)
+salarioMujer <- na.omit(salarioMujer)
+salarioMujer
+
+```
+
+
+
+Para calcular el intervalo de confianza  de una variancia, se utiliza la siguiente funcion de R.
+
+  varTest(salarioMujer, conf.level = 0.95)$conf.int
+  
+####IC de una varianza utilizando una población
+
+```{r}
+varTest(salarioMujer, conf.level = 0.95)$conf.int
+```
+
+####Conclución
+
+De acuerdo con el intervalo de confianza con un nivel de 95% se espera que el IC encontrado contenga al parámetro.
+
+
+
+
+
+
+## Para 2 poblaciones.
+
+###IC de un cociente de variancias utlizando dos poblaciones
+
+
+####Se quiere comparar ambos grupos, con respecto a la afinidad hacia dos partidos politicos de las personas entre 30 y 50 años.
+
+Poblaciones
+X: Personas entre 20 y 70 años que siguen al PLN
+Y: Personas entre 20 y 70 años que siguen al PAC
+
+Se asume que ambas poblaciones son normales.
+
+
+Para calcular el intervalo de confianza  de un cociente de variancias, se utiliza la siguiente funcion de R.
+    stests :: var.test(Población 1, Población 2,conf.level = 0.95)$conf.int
+
+
+####Personas entre 20 y 70 años que siguen al PLN(Partido Liberación Nacional)
+```{r}
+personasPLN <- Elecciones[Elecciones$partidoPolítico =="PLN" & Elecciones$edad >=20 & Elecciones$edad <= 70,]$salarioMes
+personasPLN <- as.numeric(personasPLN)
+personasPLN <- na.omit(personasPLN)
+personasPLN
+```
+
+####Personas entre 20 y 70 años que siguen al PAC(Partido Acción Ciudadana)
+```{r}
+personasPAC <- Elecciones[Elecciones$partidoPolítico =="PAC" & Elecciones$edad >=20 & Elecciones$edad <= 70,]$salarioMes
+personasPAC <- as.numeric(personasPAC)
+personasPAC <- na.omit(personasPAC)
+personasPAC
+```
+
+####IC de un cociente de variancias utlizando dos poblaciones
+```{r} 
+stests :: var.test(personasPLN, personasPAC,conf.level = 0.95)$conf.int
+
+```
+
+####Conclución
+Atravez del intervalo de confianza se ha demostrado que la varianza que se da de los ingresos no presentan diferencias significativas entre las 2 poblaciones debido al ser este [0.4019532, 1.1592313], por lo que podemos asegurar que ambas poblaciones son similares.
+
+
+
+
+
+
+
+
+
+
+
+
+### Para 1 población.
+
+## IC de un promedio usando distribución Z.
+
+
+```{r include=FALSE}
+salario <- Elecciones[Elecciones$edad > 17 & Elecciones$edad < 61,]$salarioMes
+```
+
+
+```{r include=FALSE}
+
+#Se crea variable salario de tipo numeric
+
+#salario <- as.numeric(Elecciones$salarioMes)
+salario <- as.numeric(salario)
+```
+
+
+```{r include=FALSE}
+
+#Solo tomamos los salarios > 100 colones.
+
+salario <- salario[ salario > 100]
+```
+
+
+```{r include=FALSE}
+salarioDE <- sd(salario)
+salarioDE 
+```
+
+
+```{r include=FALSE}
+#Salario varianza
+varianza = var(salario)
+varianza
+```
+
+
+
+
+
+Se quiere analizar el salario de las personas entre 18 años y 60 años.
+
+
+**Población:** personas entre 18 años y 60 años.
+
+**Variable cuantitativa:** salario.
+
+
+Por medio del Teorema del límite Central se asume que distribución muestral de medias de personas entre 18 años y 60 años es normal debido a su tamaño de muestra >=30.
+
+
+
+#### Calculo:
+
+
+Para poder hacer la implementación de un promedio utilizando la distribución z, se utilizarán 3 paquetes: *PASWR2*, *BSDA* y *STESTS*. 
+
+
+
+
+Al automatizar el proceso se puede usar la función de R llamada *z.test* del paquete *PASWR2* cuya estructura seria:
+
+        z.test(x, sigma.x, conf.level = 0.95)
+        
+donde:
+
+  - **x:** vector de valores numéricos.
+  
+  - **sigma.x:** desviación estándar poblacional.
+  
+  - **conf.level:** nivel de confianza del intervalo, está restringido por valores entre 0 y 1.
+  
+
+
+Para solamente mostrar el Intervalo de Confianza se utiliza el valor de *conf.int*
+      
+      z.test(x, sigma.x, conf.level = 0.95)$conf.int
+    
+donde:
+
+  - **conf.int:** Intervalo de confianza.
+  
+
+A continuación, la implementación de z.tests del paquete PASWR2:
+```{r}
+PASWR2::z.test(x = salario, sigma.x = salarioDE, conf.level = 0.90)$conf.int
+```
+
+
+
+
+Seguidamente se detalla la función *z.test* para el paquete *BSDA* cuya estructura seria:
+
+        z.test(x, sigma.x, conf.level = 0.95)
+        
+donde:
+
+  - **x:** vector de valores numéricos.
+  
+  - **sigma.x:** desviación estándar poblacional.
+  
+  - **conf.level:** nivel de confianza del intervalo, está restringido a valores entre 0 y 1.
+
+
+
+Para mostrar el IC se utiliza el valor de *conf.int*
+      
+      z.test(x, sigma.x, conf.level = 0.95)$conf.int
+    
+donde:
+  - **conf.int:** Intervalo de confianza.
+
+
+Implementación de z.test utilizando el paquete BSDA:
+```{r}
+BSDA::z.test(x = salario, sigma.x = salarioDE, conf.level = 0.90)$conf.int#comentario
+```
+
+
+Finalmente, dentro del paquete *stests* existe la función *z.test* cuya estructura es:
+
+        z.test(x, sigma2, conf.level = 0.95)
+        
+donde:
+
+  - **x:** vector de valores numéricos.
+  
+  - **sigma2:** varianza poblacional conocida.
+  
+  - **conf.level:** nivel de confianza dle intervalo, por defecto viene en 0.95
+
+*conf.int* mostrará únicamente el Intervalo de Confianza:
+
+      z.test(x, sigma2, conf.level = 0.95)$conf.int
+    
+donde:
+
+  - **conf.int:** Intervalo de confianza.
+
+
+A continuación, se muestra la implementación utilizando z.test del paquete stests:
+```{r}
+stests::z.test(x = salario, sigma2 = varianza, conf.level = 0.90)$conf.int
+```
+
+
+
+Al observar los resultados obtenidos podemos concluir que con un 90% de nivel de confianza, se espera que el IC contenga al verdadero promedio de salario.
+
+
+
+
+
+
+### Para 2 poblaciones.
+
+En el caso de realizar análisis con dos poblaciones, el paquete *stests* no trae una función que permita hacer el análisis con dos poblaciones. Por lo tanto se hará el estudio con los paquetes *PASWR2* y *BSDA*.
+
+
+## IC de una diferencia de promedios usando distribución Z.
+
+Sean X e Y variables aleatorias, donde:
+
+**X:** Población de personas menores a 40 años.
+
+**Y:** Población de personas mayores a 39 años.
+
+
+
+Supongamos que el interés de la política de la población de personas menores a 40 años y la población de personas mayores a 39 años, siguen una distribución normal.
+
+Se quiere comparar ambos grupos, con respecto al interés de la política. 
+
+```{r include=FALSE}
+interesPol1 <- Elecciones[Elecciones$edad < 40 ,]$interesPolítica
+```
+
+
+```{r include=FALSE}
+interesPol2 <- Elecciones[Elecciones$edad >= 40 ,]$interesPolítica
+interesPol2
+```
+
+
+
+```{r include=FALSE}
+
+#convertimos a numeric
+
+interesPol1 <- as.numeric(interesPol1)
+interesPol1
+```
+
+```{r include=FALSE}
+interesPol2 <- as.numeric(interesPol2)
+interesPol2
+```
+
+
+```{r include=FALSE}
+
+#desviacion estandar
+desvE1 <- sd(interesPol1)
+desvE1
+```
+
+
+```{r include=FALSE}
+
+#omitimos nulos
+
+desvE2 <- na.omit(interesPol2)
+desvE2
+```
+
+
+```{r include=FALSE}
+
+#desviacion estandar 2
+
+desvE2 <- sd(desvE2)
+desvE2
+```
+
+
+
+
+Automatizando el proceso utilizamos la función de R llamada *z.test* del paquete *PASWR2* cuya estructura para dos poblaciones seria:
+
+        z.test(x, y, sigma.x, sigma.y, conf.level = 0.95)
+        
+donde:
+
+  - **x:** vector de valores numéricos.
+  
+  - **y:** vector de valores numéricos opcional.
+  
+  - **sigma.x:** desviación estándar poblacional de x.
+  
+  - **sigma.y:** desviación estándar poblacional de y.
+  
+  - **conf.level:** nivel de confianza del intervalo, está restringido por valores entre 0 y 1.
+  
+
+para solamente mostrar el IC se utiliza el valor de *conf.int* :
+
+      
+      z.test(x, y, sigma.x, sigma.y, conf.level = 0.95)$conf.int
+      
+    
+donde:
+
+  -**conf.int:** Intervalo de confianza.
+
+A continuación, la implementación de z.tests del paquete PASWR2:
+```{r}
+PASWR2::z.test(x = interesPol1, y = interesPol2, sigma.x = desvE1, sigma.y = desvE2 ,conf.level = 0.90)$conf.int
+```
+
+
+
+
+
+En el caso del paquete *BSDA* la estructura de *z.test* es:
+
+
+        z.test(x, y, sigma.x, sigma.y, conf.level = 0.95)
+        
+        
+donde:
+
+  - **x:** vector de valores numéricos de x.
+  
+  - **y:** vector de valores numéricos de y.
+  
+  - **sigma.x:** desviación estándar poblacional de x.
+  
+  - **sigma.y:** desviación estándar poblacional de y.
+  
+  - **conf.level:** nivel de confianza del intervalo, está restringido por valores entre 0 y 1.
+  
+
+
+Para mostrar el IC se utiliza el valor de conf.int
+
+      
+      z.test(x, y, sigma.x, sigma.y, conf.level = 0.95)$conf.int
+    
+
+donde:
+
+  - **conf.int:** Intervalo de confianza.
+  
+  
+  
+
+A continuación, la implementación de z.tests del paquete PASWR2:
+
+
+Implementación de z.test utilizando el paquete BSDA:
+```{r}
+BSDA::z.test(x = interesPol1, y = interesPol2, sigma.x = desvE1, sigma.y = desvE2 ,conf.level = 0.90)$conf.int
+```
+
+
+
+Podemos concluir que al tener una probabilidad del 90% la diferencia de las medias poblacionales está en algún lugar de este intervalo.
+
+También notamos que ambos grupos tienen el mismo promedio debido a que el valor 0 está contenido dentro del intervalo *]-0.6320728, 0.4230857[* 
+
+Por lo tanto, el grupo de personas menores a 40 años como el grupo de personas mayores a 39 años tienen el mismo nivel de interés en la política.
+
+
+
+
+
+
+-------------------------------------------------
+
+# Gráfico de Partidos Políticos
+
+
+Para finalizar, se mostrará un gráfico el cuál contiene en el eje x, los partídos políticos y en el eje y, las edades de todos los participantes.
+
+En el gráfico los partidos políticos se encuentran enumerados del 1 al 5 donde:
+
+
+**1** es el Partido Liberación Nacional.
+
+**2** es el Partido Acción Ciudadana.
+
+**3** es el Partido Unidad Social Cristiana.
+
+**4** es el Partido Nueva República.
+
+**5** se refiere a otros partidos políticos.
+
+```{r include=FALSE}
+
+#Los valores nulos los quitamos de la base de datos. Esta nueva base de datos generada estara en la variable voto
+
+voto <- na.omit(Elecciones)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+
+
+#Gráfico que muestra valores en blanco de la Base de datos Elecciones
+plot_missing(Elecciones)
+
+
+#Se puede observar que la única variable qué presenta datos en blanco es la de partidoPolítico, sin embargo a pesar de eso esta tiene el estado de Good, lo que significa que para trabajar con esa variable está bien.
+
+```
+
+
+
+```{r include=FALSE}
+
+#creamos una variable cuantitativa para los partidos politicos
+
+voto$partido_cuanti <- ifelse(voto$partidoPolítico == "PLN", 1,
+                              ifelse(voto$partidoPolítico == "PAC", 2,
+                                     ifelse(voto$partidoPolítico == "PUSC", 3,
+                                            ifelse(voto$partidoPolítico == "PNR", 4,
+                                                   5))))
+voto
+```
+
+
+```{r include=FALSE}
+ggplot(voto, aes(partido_cuanti, edad)) + 
+  geom_boxplot(alpha = 0.4, color="blue", aes(group = cut_width(partido_cuanti,1))
+)
+
+```
+
+
+```{r echo=FALSE}
+
+#Titulo al grafico
+
+ggplot(voto, aes(partido_cuanti, edad)) + 
+  geom_boxplot(alpha = 0.4, color="blue", aes(group = cut_width(partido_cuanti,1))
+)+labs(title = "Titutlo", subtitle = "Subtitulo", y="Edad", x="Partido político")
+
+```
+
+
+Se puede observar que el partido que presenta mas variabilidad es el de PLN,ya que posee edades desde antes de 20 años y mayor a 80 años.
+
+Como dato atípico tenemos a una persona de 60 años que sigue el PAC.
+
+
+
+
+
+
+***
+
+# Pruebas de hipótesis 
+
+## Promedio con Distribución Z para 1 población.
+
+
+Regresando al mismo problema tomado para un Intervalo de Confianza de un promedio para 1 población tenemos:
+
+
+**Se quiere analizar el salario de las personas entre 18 años y 60 años.
+Una persona afirma que el salario promedio de este grupo es mayor a los 800000 colones.**
+
+
+
+Del enunciado tenemos:
+
+  $H_0:  \mu = 800000 colones$
+  
+  $H_1:  \mu > 800000 colones$
+
+Basándonos en $H_1$ sabemos que el tipo de prueba es de *Cola Derecha* utilizando la distribución $Z$.
+
+
+Para automatizar el proceso se utilizará del paquete stest la función z.test que contiene:
+
+
+              stests::z.test(x, sigma2, mu, alternative, conf.level)
+
+
+en donde:
+
+
+
+| Argumentos        | Descripción 
+|-------------------|-------------------------------------------------------------------------|
+| **x:**            | vector de valores numéricos                                             |
+| **sigma2:**       | varianza poblacional conocida                                           |
+| **mu:**           | media de la hipótesis nula                                              |
+| **alternative:**  | es el tipo de prueba, se puede escoger entre "two.sided" para casos de dos colas, "greater" para caso de cola derecha y "less" para el caso de cola izquierda.               |
+| **conf.level:**   | nivel de confianza del intervalo, por defecto viene en 0.95             |
+
+A continuación, se mostrará las variables que se requieren para realizar la prueba de hipótesis de una media:
+
+
+| Variables         | Tipo                 | Descripción 
+|-------------------|----------------------|--------------------------------------------------|
+| **salario:**      | numérica             | salario de personas entre los 18 años y 60 años  |
+| **salarioVar:**   | numérica             | varianza muestral de la población                | 
+
+
+
+
+La implementación en R para las variables es la siguiente:
+
+
+```{r echo=TRUE}
+# Tomamos los salarios de personas entre los 18 años y 60 años de edad
+salario <- Elecciones[Elecciones$edad > 17 & Elecciones$edad < 61,]$salarioMes
+```
+
+
+```{r echo=TRUE}
+#La variable salario la convertimos a tipo numeric.
+salario <- as.numeric(salario)
+```
+
+
+```{r include=FALSE}
+
+#Solo tomamos los salarios > 100 colones.
+salario <- salario[ salario > 100]
+```
+
+Obtenemos la varianza:
+```{r echo=TRUE}
+#Salario varianza
+salarioVar = var(salario)
+```
+
+
+
+
+A continuación, la implementación de la prueba de hipótesis:
+```{r}
+stests::z.test(x = salario, sigma2 = salarioVar, mu = 800000, alternative = "greater", conf.level = 0.95)
+```
+
+De lo obtenido podemos observar que la Región de Aceptación *(RA)* y la Región de Rechazo *(RR)* quedaron de la siguiente manera:
+
+
+
+$RA: ] 657029.2, +  \infty[$
+
+$RR: ] - \infty, 657029.2[$
+
+Notamos que para este caso no se encontró evidencia suficiente en contra de $H_0$ por lo que no se rechaza, pues:
+
+$800000 \in RA$
+
+Llegando a concluir que el salario promedio a lo sumo ronda los 800000 colones.
+
+***
+
+## Diferencia de promedios con Distribución Z (2 poblaciones).
+
+Tomando como base las poblaciones utilizadas para un Intervalo de Confianza de una diferencia de promedios usando distribución Z, tenemos lo siguiente:
+
+
+
+Sean X e Y variables aleatorias, donde:
+
+**X:** Población de personas menores a 40 años.
+
+**Y:** Población de personas mayores a 39 años.
+
+
+**Nos planteamos si la media del interés en la política es la misma para el grupo de personas menores a 40 años y el grupo de personas mayores a 39 años.**
+
+Del enunciado tenemos las siguientes hipótesis:
+
+  $H_0:  \mu_1 = \mu_2  \approx \mu_1 - \mu_2 = 0$
+  
+  $H_1:  \mu_1 \neq \mu_2$
+
+
+El tipo de prueba es de *Dos Colas* por lo que $H_1$ nos presenta. También se utilizará la distribución $Z$
+
+Para la implementación se utilizará la función z.test del paquete BSDA:
+
+
+        BSDA::z.test(x, y, sigma.x, sigma.y, mu, alternative, conf.level)
+
+en donde:
+
+| Argumentos        | Descripción 
+|-------------------|-------------------------------------------------------------------------|
+| **x:**             | vector de valores numéricos correspondiente a la población 1            |
+| **y:**             | vector de valores numéricos correspondiente a la población 2            |
+| **sigma.x:**       | desviación estándar de la población 1                                   |
+| **sigma.y:**       | desviación estándar de la población 2                                   |
+| **mu:**           | diferencia de medias especificada en la hipótesis nula                  |
+| **alternative:**  | tipo de prueba, se puede escoger entre "two.sided" para casos de dos colas, "greater" para caso de cola derecha y "less" para el caso de cola izquierda.           |
+| **conf.level:**   | nivel de confianza dle intervalo. Tiene que ser un valor entre 0 y 1    |
+
+
+Variables requeridas para realizar la prueba:
+
+| Variables         | Tipo                 | Descripción 
+|-------------------|----------------------|--------------------------------------------------|
+| **interesPol1:**  | numérica             | Valor entre 0 y 10 que se refiere al interés en la política de personas menores a 40 años.                                                       |
+| **interesPol2:**  | numérica             | Valor entre 0 y 10 que se refiere al interés en la política de personas mayores a 39 años.                                                       |
+| **intPolDE1:**    | numérica             | desviación estándar del grupo1                   |
+| **intPolDE2:**    | numérica             | desviación estándar del grupo2                   |
+
+A continuación se muestra la implementación:
+
+
+```{r echo=TRUE}
+#Seleccionamos a las personas menor de 40 años junto con el interés hacia la política que tienen
+interesPol1 <- Elecciones[Elecciones$edad < 40 ,]$interesPolítica
+```
+
+
+
+```{r echo=TRUE}
+#Seleccionamos a las personas de 40 años o más, junto con el interés hacia la política que tienen
+interesPol2 <- Elecciones[Elecciones$edad >= 40 ,]$interesPolítica
+```
+
+```{r include=FALSE}
+
+#convertimos a numeric
+
+interesPol1 <- as.numeric(interesPol1)
+interesPol1
+```
+
+```{r include=FALSE}
+interesPol2 <- as.numeric(interesPol2)
+interesPol2
+```
+
+```{r echo=TRUE}
+# Sacamos la desviacion estándar del primer grupo
+intPolDE1 <- sd(interesPol1)
+intPolDE1
+```
+
+
+```{r include=FALSE}
+#omitimos nulos de la población 2 ya que contiene nulos.
+intPolDE2 <- na.omit(interesPol2)
+intPolDE2
+```
+
+
+```{r echo=TRUE}
+#Desviacion estándar del segundo grupo.
+intPolDE2 <- sd(intPolDE2)
+intPolDE2
+```
+
+
+A continuación, la implementación de la prueba de hipótesis
+```{r}
+BSDA::z.test(x = interesPol1, y = interesPol2, alternative = "two.sided" , mu = 0, sigma.x = intPolDE1, sigma.y = intPolDE2 ,conf.level = 0.90)
+```
+
+De lo obtenido podemos observar lo siguiente:
+
+$RA: ] -0.6320728, 0.4230857[$
+
+$RR: ] - \infty, -0.6320728[ \cup ]0.4230857, + \infty[$
+
+$Z_{obs} = -0.32578$
+
+$P = 0.7446$
+
+$\mu_1 = 5.237200$
+
+$\mu_2 = 5.341694$
+
+Analizando los resultados, se concluye que no hay suficiente evidencia para rechazar $H_0$ ya que el valor $0 \in RA$ Por lo tanto lo planteado en el problema se concluye que es altamente probable que las medias de ambas poblaciones sean iguales. 
+
+***

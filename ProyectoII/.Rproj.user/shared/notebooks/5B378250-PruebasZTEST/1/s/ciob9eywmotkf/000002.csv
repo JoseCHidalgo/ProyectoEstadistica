@@ -1,0 +1,2 @@
+"0","set.seed(1000)"
+"0","Votantes.tradicionales.elegidos <- sample(1:length(Votantes.tradicionales),30,replace = TRUE)"
